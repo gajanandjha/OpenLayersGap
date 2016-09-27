@@ -16,15 +16,38 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        console.log("deviceready received");
-        map = new OpenLayers.Map('map');
-        layer = new OpenLayers.Layer.OSM( "Simple OSM Map");
-        map.addLayer(layer);
-        map.setCenter(
-            new OpenLayers.LonLat(4.072693, 46.034427).transform(
-                new OpenLayers.Projection("EPSG:4326"),
-                map.getProjectionObject()
-            ), 13
+          console.log("deviceready received");
+          var openStreetMapLayer = new ol.layer.Tile({
+          source: new ol.source.OSM({
+            url: 'http://tile.openstreetmap.org/{z}/{x}/{y}.png'
+          })
+        });
+        var urbanMapLayer = new ol.layer.Tile({
+          source: new ol.source.OSM({
+            url: 'http://181.215.109.65/{z}/{x}/{y}.png'
+          })
+        });
+        urbanMapLayer.setOpacity(0.4);
+        var map = new ol.Map({
+          layers: [
+            openStreetMapLayer,
+            urbanMapLayer
+          ],
+          target: 'map',
+          controls: ol.control.defaults().extend([
+            new ol.control.FullScreen()
+          ]),
+          view: new ol.View({
+            maxZoom: 18,
+            center: ol.proj.transform([88.3639, 22.5726], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 10
+          })
+        });
+
+        var div = $('#map');
+        div.height(
+          Math.max( div.height() + ($(window).height() - $('body').height()), 300 )
         );
+        map.updateSize();
     },
 };
